@@ -27,6 +27,7 @@ SOURCES += \
     conf/firewallconf.cpp \
     conf/inioptions.cpp \
     conf/rule.cpp \
+    conf/speedlimit.cpp \
     conf/zone.cpp \
     control/command/controlcommandbackup.cpp \
     control/command/controlcommandbase.cpp \
@@ -277,6 +278,7 @@ HEADERS += \
     conf/firewallconf.h \
     conf/inioptions.h \
     conf/rule.h \
+    conf/speedlimit.h \
     conf/zone.h \
     control/command/controlcommandbackup.h \
     control/command/controlcommandbase.h \

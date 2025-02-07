@@ -20,8 +20,8 @@ CREATE TABLE address_group(
   order_index INTEGER NOT NULL,
   include_all BOOLEAN NOT NULL,
   exclude_all BOOLEAN NOT NULL,
-  include_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
-  exclude_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
+  include_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
+  exclude_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
   include_text TEXT NOT NULL,
   exclude_text TEXT NOT NULL
 );
@@ -30,10 +30,10 @@ CREATE TABLE speed_limit(
   speed_limit_id INTEGER PRIMARY KEY,
   enabled BOOLEAN NOT NULL,
   inbound BOOLEAN NOT NULL,
-  bps INTEGER NOT NULL,
-  packet_loss INTEGER NOT NULL DEFAULT 0,
-  latency INTEGER NOT NULL DEFAULT 0,
-  bufsize INTEGER NOT NULL DEFAULT 150000,
+  kbps INTEGER NOT NULL, -- kilobits per second
+  packet_loss INTEGER NOT NULL, -- percent
+  latency INTEGER NOT NULL, -- milliseconds
+  bufsize INTEGER NOT NULL,
   name TEXT NOT NULL
 );
 
@@ -80,8 +80,8 @@ CREATE TABLE app(
   log_blocked_conn BOOLEAN NOT NULL DEFAULT 1,
   blocked BOOLEAN NOT NULL,
   kill_process BOOLEAN NOT NULL DEFAULT 0,
-  accept_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
-  reject_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
+  accept_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
+  reject_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
   rule_id INTEGER,
   creat_time INTEGER NOT NULL,
   end_action INTEGER NOT NULL DEFAULT 0,
@@ -109,8 +109,8 @@ CREATE TABLE rule(
   notes TEXT,
   rule_text TEXT NOT NULL,
   rule_type INTEGER NOT NULL, -- app rules, global before/after apps, preset rules
-  accept_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
-  reject_zones INTEGER NOT NULL DEFAULT 0,  -- zone ids bit mask
+  accept_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
+  reject_zones INTEGER NOT NULL DEFAULT 0, -- zone ids bit mask
   mod_time INTEGER NOT NULL
 );
 
