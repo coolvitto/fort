@@ -24,6 +24,7 @@ public:
     virtual bool deleteZone(int zoneId);
     virtual bool updateZoneName(int zoneId, const QString &zoneName);
     virtual bool updateZoneEnabled(int zoneId, bool enabled);
+
     bool updateZoneResult(const Zone &zone);
 
     void updateDriverZones(quint32 zonesMask, quint32 enabledMask, quint32 dataSize,

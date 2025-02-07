@@ -20,8 +20,8 @@
 #define FORT_CONF_RULE_FILTER_DEPTH_MAX 7
 #define FORT_CONF_RULE_SET_DEPTH_MAX    8
 #define FORT_CONF_ZONE_MAX              32
-#define FORT_CONF_GROUP_MAX             32
-#define FORT_CONF_SPEED_LIMIT_MAX       32
+#define FORT_CONF_GROUP_MAX             64
+#define FORT_CONF_SPEED_LIMIT_MAX       64
 #define FORT_CONF_APPS_LEN_MAX          (64 * 1024 * 1024)
 #define FORT_CONF_APP_PATH_MAX          1024
 #define FORT_CONF_APP_PATH_MAX_SIZE     (FORT_CONF_APP_PATH_MAX * sizeof(WCHAR))
@@ -317,10 +317,10 @@ typedef struct fort_app_data
 
     UCHAR reserved; /* not used */
 
-    UCHAR group_index;
+    UCHAR group_id;
 
-    UCHAR speed_limit_in_id;
-    UCHAR speed_limit_out_id;
+    UCHAR in_limit_id;
+    UCHAR out_limit_id;
 
     UINT16 rule_id;
 

@@ -112,7 +112,7 @@ void ProgramEditDialog::initialize(const AppRow &appRow, const QVector<qint64> &
 
     initializePathNameRuleFields(isSingleSelection);
 
-    m_comboAppGroup->setCurrentIndex(appRow.groupIndex);
+    m_comboAppGroup->setCurrentIndex(appRow.groupId);
 
     m_rbAllow->setChecked(!appRow.blocked);
     m_rbBlock->setChecked(appRow.blocked);
@@ -938,7 +938,7 @@ void ProgramEditDialog::fillApp(App &app) const
     app.logBlockedConn = m_cbLogBlockedConn->isChecked();
     app.blocked = !m_rbAllow->isChecked();
     app.killProcess = m_rbKillProcess->isChecked();
-    app.groupIndex = m_comboAppGroup->currentIndex();
+    app.groupId = m_comboAppGroup->currentIndex();
     app.ruleId = currentRuleId();
     app.appName = m_editName->text();
     app.notes = m_editNotes->toPlainText();

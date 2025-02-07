@@ -80,7 +80,7 @@ QVariant dataDisplayGroup(const App &app, int /*role*/)
 {
     const FirewallConf *conf = IoC<ConfAppManager>()->conf();
 
-    const AppGroup *appGroup = conf->appGroupAt(app.groupIndex);
+    const AppGroup *appGroup = conf->appGroupAt(app.groupId);
 
     return appGroup->name();
 }
@@ -163,7 +163,7 @@ QVariant AppListModelData::appGroupColor() const
 {
     const FirewallConf *conf = IoC<ConfAppManager>()->conf();
 
-    const AppGroup *appGroup = conf->appGroupAt(app().groupIndex);
+    const AppGroup *appGroup = conf->appGroupAt(app().groupId);
     if (!appGroup->enabled())
         return inactiveColor;
 

@@ -19,6 +19,7 @@ public:
     bool isExtraFlagsEqual(const App &o) const;
     bool isZonesEqual(const App &o) const;
     bool isPathsEqual(const App &o) const;
+    bool isLimitsEqual(const App &o) const;
     bool isOptionsEqual(const App &o) const;
     bool isNameEqual(const App &o) const;
 
@@ -41,10 +42,10 @@ public:
 
     qint8 scheduleAction = ScheduleBlock;
 
-    quint8 groupIndex = 0; // default App Group
+    quint8 groupId = 0; // default App Group
 
-    quint8 speedLimitInId = 0;
-    quint8 speedLimitOutId = 0;
+    quint8 inLimitId = 0;
+    quint8 outLimitId = 0;
 
     quint16 ruleId = 0;
 

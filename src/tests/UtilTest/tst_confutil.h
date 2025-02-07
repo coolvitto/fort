@@ -118,7 +118,7 @@ TEST_F(ConfUtilTest, confWriteRead)
 
     const auto firefoxData = DriverCommon::confAppFind(
             data, FileUtil::pathToKernelPath("C:\\Utils\\Firefox\\Bin\\firefox.exe"));
-    ASSERT_EQ(int(firefoxData.group_index), 1);
+    ASSERT_EQ(int(firefoxData.group_id), 1);
 }
 
 TEST_F(ConfUtilTest, checkEnvManager)
