@@ -23,6 +23,7 @@ SOURCES += \
     conf/confappmanager.cpp \
     conf/confmanager.cpp \
     conf/confrulemanager.cpp \
+    conf/confspeedlimitmanager.cpp \
     conf/confzonemanager.cpp \
     conf/firewallconf.cpp \
     conf/inioptions.cpp \
@@ -274,6 +275,7 @@ HEADERS += \
     conf/confappmanager.h \
     conf/confmanager.h \
     conf/confrulemanager.h \
+    conf/confspeedlimitmanager.h \
     conf/confzonemanager.h \
     conf/firewallconf.h \
     conf/inioptions.h \
