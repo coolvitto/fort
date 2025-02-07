@@ -721,7 +721,7 @@ static void fort_shaper_create_queues(
 
 static void fort_shaper_free_queues(PFORT_SHAPER shaper)
 {
-    for (int i = 0; i < FORT_CONF_GROUP_MAX; ++i) {
+    for (int i = 0; i < FORT_CONF_SPEED_LIMIT_MAX; ++i) {
         PFORT_PACKET_QUEUE queue = shaper->queues[i];
         if (queue == NULL)
             continue;
@@ -761,7 +761,7 @@ inline static ULONG fort_shaper_thread_process_queues(PFORT_SHAPER shaper, ULONG
 inline static BOOL fort_shaper_thread_process(PFORT_SHAPER shaper)
 {
     ULONG active_io_bits =
-            fort_shaper_io_bits_set(&shaper->active_io_bits, FORT_PACKET_FLUSH_ALL, FALSE);
+            fort_shaper_io_bits_set(&shaper->active_bits, FORT_PACKET_FLUSH_ALL, FALSE);
 
     if (active_io_bits == 0)
         return FALSE;
@@ -769,7 +769,7 @@ inline static BOOL fort_shaper_thread_process(PFORT_SHAPER shaper)
     active_io_bits = fort_shaper_thread_process_queues(shaper, active_io_bits);
 
     if (active_io_bits != 0) {
-        fort_shaper_io_bits_set(&shaper->active_io_bits, active_io_bits, TRUE);
+        fort_shaper_io_bits_set(&shaper->active_bits, active_io_bits, TRUE);
 
         return TRUE;
     }
@@ -831,7 +831,7 @@ static void fort_shaper_flush(PFORT_SHAPER shaper, UINT32 group_io_bits, BOOL dr
     if (group_io_bits == 0)
         return;
 
-    group_io_bits &= fort_shaper_io_bits_set(&shaper->active_io_bits, group_io_bits, FALSE);
+    group_io_bits &= fort_shaper_io_bits_set(&shaper->active_bits, group_io_bits, FALSE);
 
     /* Collect packets from Queues */
     PFORT_FLOW_PACKET pkt_chain = fort_shaper_flush_queues(shaper, group_io_bits);
@@ -883,7 +883,7 @@ FORT_API void fort_shaper_conf_update(PFORT_SHAPER shaper, PCFORT_CONF_IO conf_i
 
         fort_shaper_create_queues(shaper, conf_group->limits, limit_io_bits);
 
-        shaper->limit_io_bits = limit_io_bits;
+        shaper->limit_bits = limit_io_bits;
 
         fort_shaper_io_bits_exchange(&shaper->group_io_bits, group_io_bits);
     }
@@ -903,8 +903,7 @@ void fort_shaper_conf_flags_update(PFORT_SHAPER shaper, const FORT_CONF_FLAGS co
     {
         flush_io_bits = (group_io_bits ^ shaper->group_io_bits);
 
-        fort_shaper_io_bits_exchange(
-                &shaper->group_io_bits, (shaper->limit_io_bits & group_io_bits));
+        fort_shaper_io_bits_exchange(&shaper->group_io_bits, (shaper->limit_bits & group_io_bits));
     }
     KeReleaseInStackQueuedSpinLock(&lock_queue);
 
@@ -921,7 +920,7 @@ static void fort_shaper_packet_queue_add_packet(
 
         fort_shaper_packet_list_add_chain(&queue->bandwidth_list, pkt, pkt);
 
-        fort_shaper_io_bits_set(&shaper->active_io_bits, queue_bit, TRUE);
+        fort_shaper_io_bits_set(&shaper->active_bits, queue_bit, TRUE);
     }
     KeReleaseInStackQueuedSpinLock(&lock_queue);
 }
@@ -964,7 +963,7 @@ static BOOL fort_shaper_packet_queue_check_packet(
 inline static NTSTATUS fort_shaper_packet_queue(
         PFORT_SHAPER shaper, PCFORT_CALLOUT_ARG ca, PFORT_FLOW flow)
 {
-    const UINT16 queue_index = flow->opt.group_index * 2 + (ca->inbound ? 0 : 1);
+    const UINT16 queue_index = 0; // flow->opt.speed_limit_id * 2 + (ca->inbound ? 0 : 1);
 
     const UINT32 group_io_bits = fort_shaper_io_bits(&shaper->group_io_bits);
 
@@ -1032,6 +1031,8 @@ FORT_API BOOL fort_shaper_packet_process(PFORT_SHAPER shaper, PFORT_CALLOUT_ARG 
             || fort_device_flag(&fort_device()->conf, FORT_DEVICE_POWER_OFF) != 0)
         return FALSE;
 
+    const UCHAR speed_limit_id = ca->inbound ? FORT_FLOW_SPEED_LIMIT_IN : FORT_FLOW_SPEED_LIMIT_OUT;
+
     ca->isIPv6 = (flow_flags & FORT_FLOW_IP6) != 0;
 
     /* Skip self injected packet */
@@ -1056,8 +1057,8 @@ FORT_API void fort_shaper_drop_flow_packets(PFORT_SHAPER shaper, UINT64 flowCont
     /* Collect flow's packets from Queues */
     PFORT_FLOW_PACKET pkt_chain = NULL;
 
-    UINT32 active_io_bits = fort_shaper_io_bits(&shaper->active_io_bits)
-            & (speed_limit << (flow->opt.group_index * 2));
+    UINT32 active_io_bits = fort_shaper_io_bits(&shaper->active_bits)
+            & 0; // (speed_limit << (flow->opt.speed_limit_id * 2));
 
     for (int i = 0; active_io_bits != 0; ++i) {
         const BOOL queue_exists = (active_io_bits & 1) != 0;
@@ -1169,10 +1170,10 @@ static void fort_pending_proc_put_locked(PFORT_PENDING pending, PFORT_PENDING_PR
 }
 
 static NTSTATUS fort_pending_proc_add_packet_locked(PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca,
-        PFORT_CALLOUT_ALE_EXTRA cx, PFORT_PENDING_PACKET pkt)
+        PCFORT_CONF_META_CONN conn, PFORT_PENDING_PACKET pkt)
 {
     /* Create the Pending Process */
-    PFORT_PENDING_PROC proc = fort_pending_proc_get_check(pending, cx->conn.process_id);
+    PFORT_PENDING_PROC proc = fort_pending_proc_get_check(pending, conn->process_id);
     if (proc == NULL)
         return STATUS_INSUFFICIENT_RESOURCES;
 
@@ -1195,14 +1196,14 @@ static NTSTATUS fort_pending_proc_add_packet_locked(PFORT_PENDING pending, PCFOR
 }
 
 static NTSTATUS fort_pending_proc_add_packet(PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca,
-        PFORT_CALLOUT_ALE_EXTRA cx, PFORT_PENDING_PACKET pkt)
+        PCFORT_CONF_META_CONN conn, PFORT_PENDING_PACKET pkt)
 {
     NTSTATUS status;
 
     KLOCK_QUEUE_HANDLE lock_queue;
     KeAcquireInStackQueuedSpinLock(&pending->lock, &lock_queue);
 
-    status = fort_pending_proc_add_packet_locked(pending, ca, cx, pkt);
+    status = fort_pending_proc_add_packet_locked(pending, ca, conn, pkt);
 
     KeReleaseInStackQueuedSpinLock(&lock_queue);
 
@@ -1269,7 +1270,7 @@ FORT_API void fort_pending_clear(PFORT_PENDING pending)
 }
 
 FORT_API BOOL fort_pending_add_packet(
-        PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca, PFORT_CALLOUT_ALE_EXTRA cx)
+        PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca, PCFORT_CONF_META_CONN conn)
 {
     NTSTATUS status;
 
@@ -1278,7 +1279,7 @@ FORT_API BOOL fort_pending_add_packet(
         return FALSE;
 
     /* Check the Process's Limits */
-    if (!fort_pending_proc_check_limits(pending, cx->conn.process_id))
+    if (!fort_pending_proc_check_limits(pending, conn->process_id))
         return FALSE;
 
     /* Create the Packet */
@@ -1293,7 +1294,7 @@ FORT_API BOOL fort_pending_add_packet(
     status = fort_packet_fill(ca, &pkt->io, ipsec_flag | FORT_PACKET_TYPE_PENDING);
     if (NT_SUCCESS(status)) {
         /* Add the Packet to Pending Process */
-        status = fort_pending_proc_add_packet(pending, ca, cx, pkt);
+        status = fort_pending_proc_add_packet(pending, ca, conn, pkt);
     }
 
     if (!NT_SUCCESS(status)) {

@@ -26,6 +26,17 @@ CREATE TABLE address_group(
   exclude_text TEXT NOT NULL
 );
 
+CREATE TABLE speed_limit(
+  speed_limit_id INTEGER PRIMARY KEY,
+  enabled BOOLEAN NOT NULL,
+  inbound BOOLEAN NOT NULL,
+  bps INTEGER NOT NULL,
+  packet_loss INTEGER NOT NULL DEFAULT 0,
+  latency INTEGER NOT NULL DEFAULT 0,
+  bufsize INTEGER NOT NULL DEFAULT 150000,
+  name TEXT NOT NULL
+);
+
 CREATE TABLE app_group(
   app_group_id INTEGER PRIMARY KEY,
   order_index INTEGER NOT NULL,

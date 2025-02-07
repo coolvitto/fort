@@ -138,12 +138,12 @@ typedef struct fort_shaper
 {
     UCHAR volatile flags;
 
-    UINT32 limit_io_bits;
+    UINT32 limit_bits;
 
-    LONG volatile group_io_bits;
-    LONG volatile active_io_bits;
+    UINT32 volatile group_io_bits;
+    UINT32 volatile active_bits;
 
-    ULONG randomSeed;
+    UINT32 randomSeed;
     LARGE_INTEGER qpcFrequency;
 
     KEVENT thread_event;
@@ -151,7 +151,7 @@ typedef struct fort_shaper
 
     KSPIN_LOCK lock;
 
-    PFORT_PACKET_QUEUE queues[FORT_CONF_GROUP_MAX * 2]; /* in/out-bound pairs */
+    PFORT_PACKET_QUEUE queues[FORT_CONF_SPEED_LIMIT_MAX];
 } FORT_SHAPER, *PFORT_SHAPER;
 
 #if defined(__cplusplus)
@@ -179,7 +179,7 @@ FORT_API void fort_pending_close(PFORT_PENDING pending);
 FORT_API void fort_pending_clear(PFORT_PENDING pending);
 
 FORT_API BOOL fort_pending_add_packet(
-        PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca, PFORT_CALLOUT_ALE_EXTRA cx);
+        PFORT_PENDING pending, PCFORT_CALLOUT_ARG ca, PCFORT_CONF_META_CONN conn);
 
 #ifdef __cplusplus
 } // extern "C"

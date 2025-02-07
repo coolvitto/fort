@@ -41,7 +41,10 @@ public:
 
     qint8 scheduleAction = ScheduleBlock;
 
-    qint8 groupIndex = 0; // "Main" app. group
+    quint8 groupIndex = 0; // default App Group
+
+    quint8 speedLimitInId = 0;
+    quint8 speedLimitOutId = 0;
 
     quint16 ruleId = 0;
 

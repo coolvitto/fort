@@ -10,6 +10,8 @@
 #define fort_stat_proc_hash(process_id) tommy_inthash_u32((UINT32) (process_id))
 #define fort_flow_hash(flow_id)         tommy_inthash_u32((UINT32) (flow_id))
 
+static_assert(sizeof(FORT_FLOW_OPT) == sizeof(UINT32), "FORT_FLOW_OPT size mismatch");
+
 static void fort_stat_proc_active_add(PFORT_STAT stat, PFORT_STAT_PROC proc)
 {
     if (proc->active)
@@ -17,7 +19,7 @@ static void fort_stat_proc_active_add(PFORT_STAT stat, PFORT_STAT_PROC proc)
 
     proc->active = TRUE;
 
-    /* Add to active chain */
+    /* Add to active list */
     proc->next_active = stat->proc_active;
     stat->proc_active = proc;
 
@@ -42,7 +44,7 @@ static void fort_stat_proc_free(PFORT_STAT stat, PFORT_STAT_PROC proc)
 {
     tommy_hashdyn_remove_existing(&stat->procs_map, (tommy_hashdyn_node *) proc);
 
-    /* Add to free chain */
+    /* Add to free list */
     proc->next = stat->proc_free;
     stat->proc_free = proc;
 }
@@ -88,14 +90,12 @@ static void fort_stat_proc_unlog(PVOID proc_node)
     proc->log_stat = FALSE;
 }
 
-static void fort_stat_proc_inc(PFORT_STAT stat, UINT16 proc_index)
+inline static void fort_stat_proc_inc(PFORT_STAT_PROC proc)
 {
-    PFORT_STAT_PROC proc = tommy_arrayof_ref(&stat->procs, proc_index);
-
     ++proc->refcount;
 }
 
-static void fort_stat_proc_dec(PFORT_STAT stat, UINT16 proc_index)
+inline static void fort_stat_proc_dec(PFORT_STAT stat, UINT16 proc_index)
 {
     PFORT_STAT_PROC proc = tommy_arrayof_ref(&stat->procs, proc_index);
 
@@ -255,7 +255,7 @@ static void fort_flow_free(PFORT_STAT stat, PFORT_FLOW flow)
 
     tommy_hashdyn_remove_existing(&stat->flows_map, (tommy_hashdyn_node *) flow);
 
-    /* Add to free chain */
+    /* Add to free list */
     flow->next = stat->flow_free;
     stat->flow_free = flow;
 }
@@ -292,10 +292,10 @@ inline static UCHAR fort_stat_group_speed_limit(PFORT_CONF_GROUP conf_group, UCH
     return (((conf_group->limit_io_bits) >> (group_index * 2)) & 3);
 }
 
-inline static NTSTATUS fort_flow_add_new(PFORT_STAT stat, PFORT_FLOW *flow, UINT64 flow_id,
-        tommy_key_t flow_hash, PCFORT_CONF_META_CONN conn)
+inline static NTSTATUS fort_flow_add_new(
+        PFORT_STAT stat, PFORT_FLOW *flow, tommy_key_t flow_hash, PCFORT_CONF_META_CONN conn)
 {
-    *flow = fort_flow_new(stat, flow_id, flow_hash);
+    *flow = fort_flow_new(stat, conn->flow_id, flow_hash);
     if (*flow == NULL)
         return STATUS_INSUFFICIENT_RESOURCES;
 
@@ -310,27 +310,27 @@ inline static NTSTATUS fort_flow_add_new(PFORT_STAT stat, PFORT_FLOW *flow, UINT
     return status;
 }
 
-static NTSTATUS fort_flow_add(PFORT_STAT stat, UINT64 flow_id, PCFORT_CONF_META_CONN conn,
-        UINT16 proc_index, UCHAR group_index)
+static NTSTATUS fort_flow_add(PFORT_STAT stat, PCFORT_CONF_META_CONN conn, PFORT_STAT_PROC proc)
 {
-    const tommy_key_t flow_hash = fort_flow_hash(flow_id);
-    PFORT_FLOW flow = fort_flow_get(stat, flow_id, flow_hash);
+    const tommy_key_t flow_hash = fort_flow_hash(conn->flow_id);
+    PFORT_FLOW flow = fort_flow_get(stat, conn->flow_id, flow_hash);
 
     if (flow == NULL) {
-        const NTSTATUS status = fort_flow_add_new(stat, &flow, flow_id, flow_hash, conn);
+        const NTSTATUS status = fort_flow_add_new(stat, &flow, flow_hash, conn);
 
         if (!NT_SUCCESS(status))
             return status;
 
-        fort_stat_proc_inc(stat, proc_index);
+        fort_stat_proc_inc(proc);
     }
 
-    const UCHAR speed_limit = fort_stat_group_speed_limit(&stat->conf_group, group_index);
+    const UCHAR speed_limit = 0; // fort_stat_group_speed_limit(&stat->conf_group, group_index);
 
     flow->opt.flags = speed_limit | (conn->ip_proto == IPPROTO_TCP ? FORT_FLOW_TCP : 0)
             | (conn->isIPv6 ? FORT_FLOW_IP6 : 0) | (conn->inbound ? FORT_FLOW_INBOUND : 0);
-    flow->opt.group_index = group_index;
-    flow->opt.proc_index = proc_index;
+
+    // flow->opt.speed_limit_id = group_index;
+    flow->opt.proc_index = proc->proc_index;
 
     return STATUS_SUCCESS;
 }
@@ -454,8 +454,7 @@ static NTSTATUS fort_flow_associate_proc(
     return STATUS_SUCCESS;
 }
 
-FORT_API NTSTATUS fort_flow_associate(PFORT_STAT stat, UINT64 flow_id, PCFORT_CONF_META_CONN conn,
-        UCHAR group_index, BOOL *log_stat)
+FORT_API NTSTATUS fort_flow_associate(PFORT_STAT stat, PCFORT_CONF_META_CONN conn, BOOL *log_stat)
 {
     NTSTATUS status;
 
@@ -468,7 +467,7 @@ FORT_API NTSTATUS fort_flow_associate(PFORT_STAT stat, UINT64 flow_id, PCFORT_CO
 
     /* Add flow */
     if (NT_SUCCESS(status)) {
-        status = fort_flow_add(stat, flow_id, conn, proc->proc_index, group_index);
+        status = fort_flow_add(stat, conn, proc);
 
         if (NT_SUCCESS(status)) {
             *log_stat = proc->log_stat;

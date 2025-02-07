@@ -20,7 +20,8 @@
 #define FORT_CONF_RULE_FILTER_DEPTH_MAX 7
 #define FORT_CONF_RULE_SET_DEPTH_MAX    8
 #define FORT_CONF_ZONE_MAX              32
-#define FORT_CONF_GROUP_MAX             16
+#define FORT_CONF_GROUP_MAX             32
+#define FORT_CONF_SPEED_LIMIT_MAX       32
 #define FORT_CONF_APPS_LEN_MAX          (64 * 1024 * 1024)
 #define FORT_CONF_APP_PATH_MAX          1024
 #define FORT_CONF_APP_PATH_MAX_SIZE     (FORT_CONF_APP_PATH_MAX * sizeof(WCHAR))
@@ -57,8 +58,7 @@ typedef struct fort_conf_flags
 
     UINT32 reserved_flags : 13; /* not used */
 
-    UINT16 group_bits;
-    UINT16 reserved; /* not used */
+    UINT32 group_bits;
 } FORT_CONF_FLAGS, *PFORT_CONF_FLAGS;
 
 typedef const FORT_CONF_FLAGS *PCFORT_CONF_FLAGS;
@@ -248,41 +248,6 @@ typedef const FORT_CONF_RULE_FLAG *PCFORT_CONF_RULE_FLAG;
 #define FORT_CONF_RULE_SIZE(rule)                                                                  \
     (FORT_CONF_RULE_SET_INDEXES_OFFSET(rule) + FORT_CONF_RULES_SET_INDEXES_SIZE((rule)->set_count))
 
-typedef struct fort_conf_meta_conn
-{
-    UINT16 is_reauth : 1;
-    UINT16 inbound : 1;
-    UINT16 isIPv6 : 1;
-    UINT16 profile_id : 2;
-    UINT16 is_loopback : 1;
-    UINT16 is_broadcast : 1;
-    UINT16 is_local_net : 1;
-    UINT16 inherited : 1;
-    UINT16 blocked : 1;
-    UINT16 drop_blocked : 1;
-    UINT16 ignore : 1;
-
-    UCHAR reason;
-
-    UCHAR ip_proto;
-
-    UCHAR zone_id;
-    UINT16 rule_id;
-
-    UINT16 local_port;
-    UINT16 remote_port;
-
-    UINT32 process_id;
-
-    ip_addr_t local_ip;
-    ip_addr_t remote_ip;
-
-    FORT_APP_PATH path;
-    FORT_APP_PATH real_path;
-} FORT_CONF_META_CONN, *PFORT_CONF_META_CONN;
-
-typedef const FORT_CONF_META_CONN *PCFORT_CONF_META_CONN;
-
 typedef struct fort_conf_zones
 {
     UINT32 mask;
@@ -328,8 +293,6 @@ typedef struct fort_traf
 
 typedef struct fort_app_flags
 {
-    UINT16 group_index : 5;
-
     UINT16 apply_parent : 1;
     UINT16 apply_child : 1;
     UINT16 apply_spec_child : 1;
@@ -341,20 +304,28 @@ typedef struct fort_app_flags
     UINT16 blocked : 1;
     UINT16 kill_process : 1;
 
-    UINT16 reserved : 2; /* not used */
+    UINT16 is_new : 1; /* can not replace an existing app data? */
+    UINT16 found : 1; /* is app data not empty? */
+    UINT16 alerted : 1;
+
+    UINT16 reserved : 4; /* not used */
 } FORT_APP_FLAGS, *PFORT_APP_FLAGS;
 
 typedef struct fort_app_data
 {
     FORT_APP_FLAGS flags;
 
-    UINT16 is_new : 1; /* can not replace an existing app data? */
-    UINT16 found : 1; /* is app data not empty? */
-    UINT16 alerted : 1;
-    UINT16 rule_id : 13;
+    UCHAR reserved; /* not used */
 
-    UINT16 accept_zones;
-    UINT16 reject_zones;
+    UCHAR group_index;
+
+    UCHAR speed_limit_in_id;
+    UCHAR speed_limit_out_id;
+
+    UINT16 rule_id;
+
+    UINT32 accept_zones;
+    UINT32 reject_zones;
 } FORT_APP_DATA, *PFORT_APP_DATA;
 
 typedef struct fort_app_entry
@@ -371,6 +342,48 @@ typedef const FORT_APP_ENTRY *PCFORT_APP_ENTRY;
 #define FORT_CONF_APP_ENTRY_PATH_OFF offsetof(FORT_APP_ENTRY, path)
 #define FORT_CONF_APP_ENTRY_SIZE(path_len)                                                         \
     (FORT_CONF_APP_ENTRY_PATH_OFF + (path_len) + sizeof(WCHAR)) /* include terminating zero */
+
+typedef struct fort_conf_meta_conn
+{
+    UINT16 conn_filled : 1;
+    UINT16 app_data_filled : 1;
+
+    UINT16 is_reauth : 1;
+    UINT16 inbound : 1;
+    UINT16 isIPv6 : 1;
+    UINT16 profile_id : 2;
+    UINT16 is_loopback : 1;
+    UINT16 is_broadcast : 1;
+    UINT16 is_local_net : 1;
+    UINT16 inherited : 1;
+    UINT16 blocked : 1;
+    UINT16 drop_blocked : 1;
+    UINT16 ignore : 1;
+
+    UCHAR reason;
+
+    UCHAR ip_proto;
+
+    UCHAR zone_id;
+    UINT16 rule_id;
+
+    UINT16 local_port;
+    UINT16 remote_port;
+
+    UINT32 process_id;
+
+    UINT64 flow_id;
+
+    ip_addr_t local_ip;
+    ip_addr_t remote_ip;
+
+    FORT_APP_PATH path;
+    FORT_APP_PATH real_path;
+
+    FORT_APP_DATA app_data;
+} FORT_CONF_META_CONN, *PFORT_CONF_META_CONN;
+
+typedef const FORT_CONF_META_CONN *PCFORT_CONF_META_CONN;
 
 typedef struct fort_speed_limit
 {
@@ -522,7 +535,8 @@ FORT_API FORT_APP_DATA fort_conf_app_exe_find(
 FORT_API FORT_APP_DATA fort_conf_app_find(PCFORT_CONF conf, PCFORT_APP_PATH path,
         fort_conf_app_exe_find_func *exe_find_func, PVOID exe_context);
 
-FORT_API BOOL fort_conf_app_group_blocked(const FORT_CONF_FLAGS conf_flags, FORT_APP_DATA app_data);
+FORT_API BOOL fort_conf_app_group_blocked(
+        const FORT_CONF_FLAGS conf_flags, const FORT_APP_DATA app_data);
 
 FORT_API BOOL fort_conf_rules_rt_conn_filtered(
         PCFORT_CONF_RULES_RT rules_rt, PFORT_CONF_META_CONN conn, UINT16 rule_id);
