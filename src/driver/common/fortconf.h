@@ -394,6 +394,25 @@ typedef struct fort_speed_limit
 
 typedef const FORT_SPEED_LIMIT *PCFORT_SPEED_LIMIT;
 
+typedef struct fort_conf_speed_limits
+{
+    UINT8 max_limit_id;
+
+    char data[4];
+} FORT_CONF_SPEED_LIMITS, *PFORT_CONF_SPEED_LIMITS;
+
+typedef const FORT_CONF_SPEED_LIMITS *PCFORT_CONF_SPEED_LIMITS;
+
+typedef struct fort_conf_speed_limit_flag
+{
+    UINT8 limit_id;
+    UCHAR enabled;
+} FORT_CONF_SPEED_LIMIT_FLAG, *PFORT_CONF_SPEED_LIMIT_FLAG;
+
+typedef const FORT_CONF_SPEED_LIMIT_FLAG *PCFORT_CONF_SPEED_LIMIT_FLAG;
+
+#define FORT_CONF_SPEED_LIMITS_DATA_OFF offsetof(FORT_CONF_SPEED_LIMITS, data)
+
 typedef struct fort_conf_group
 {
     UINT16 group_bits;

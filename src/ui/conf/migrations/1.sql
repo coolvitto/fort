@@ -30,11 +30,12 @@ CREATE TABLE speed_limit(
   limit_id INTEGER PRIMARY KEY,
   enabled BOOLEAN NOT NULL,
   inbound BOOLEAN NOT NULL,
+  name TEXT NOT NULL,
   kbps INTEGER NOT NULL, -- kilobits per second
   packet_loss INTEGER NOT NULL, -- percent
   latency INTEGER NOT NULL, -- milliseconds
   bufsize INTEGER NOT NULL,
-  name TEXT NOT NULL
+  mod_time INTEGER NOT NULL
 );
 
 CREATE TABLE app_group(

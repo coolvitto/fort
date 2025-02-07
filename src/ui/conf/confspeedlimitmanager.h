@@ -26,7 +26,7 @@ public:
 signals:
     void speedLimitAdded();
     void speedLimitRemoved(int limitId);
-    void speedLimitUpdated();
+    void speedLimitUpdated(int limitId);
 
 private:
     bool updateDriverSpeedLimitFlag(int limitId, bool enabled);

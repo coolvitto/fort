@@ -67,6 +67,16 @@ quint32 ioctlSetRuleFlag()
     return FORT_IOCTL_SETRULEFLAG;
 }
 
+quint32 ioctlSpeedLimits()
+{
+    return FORT_IOCTL_SETSPEEDLIMITS;
+}
+
+quint32 ioctlSetSpeedLimitFlag()
+{
+    return FORT_IOCTL_SETSPEEDLIMITFLAG;
+}
+
 quint32 userErrorCode()
 {
     return FORT_ERROR_USER_ERROR;

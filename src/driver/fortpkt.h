@@ -162,6 +162,12 @@ FORT_API void fort_shaper_open(PFORT_SHAPER shaper);
 
 FORT_API void fort_shaper_close(PFORT_SHAPER shaper);
 
+FORT_API NTSTATUS fort_shaper_speed_limits_set(
+        PFORT_SHAPER shaper, PCFORT_CONF_SPEED_LIMITS speed_limits);
+
+FORT_API void fort_shaper_speed_limit_flag_set(
+        PFORT_SHAPER shaper, PCFORT_CONF_SPEED_LIMIT_FLAG limit_flag);
+
 FORT_API void fort_shaper_conf_update(PFORT_SHAPER shaper, PCFORT_CONF_IO conf_io);
 
 FORT_API void fort_shaper_conf_flags_update(PFORT_SHAPER shaper, const FORT_CONF_FLAGS conf_flags);

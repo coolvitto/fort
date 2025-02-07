@@ -469,6 +469,7 @@ HEADERS += \
     util/conf/confdata.h \
     util/conf/confrodata.h \
     util/conf/confruleswalker.h \
+    util/conf/confspeedlimitswalker.h \
     util/conf/confutil.h \
     util/conf/ruletextparser.h \
     util/dateutil.h \

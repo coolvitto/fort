@@ -20,6 +20,8 @@ quint32 ioctlSetZones();
 quint32 ioctlSetZoneFlag();
 quint32 ioctlSetRules();
 quint32 ioctlSetRuleFlag();
+quint32 ioctlSpeedLimits();
+quint32 ioctlSetSpeedLimitFlag();
 
 quint32 userErrorCode();
 

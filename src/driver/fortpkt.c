@@ -865,6 +865,18 @@ FORT_API void fort_shaper_close(PFORT_SHAPER shaper)
     fort_shaper_free_queues(shaper);
 }
 
+FORT_API NTSTATUS fort_shaper_speed_limits_set(
+        PFORT_SHAPER shaper, PCFORT_CONF_SPEED_LIMITS speed_limits)
+{
+    return STATUS_SUCCESS;
+}
+
+FORT_API void fort_shaper_speed_limit_flag_set(
+        PFORT_SHAPER shaper, PCFORT_CONF_SPEED_LIMIT_FLAG limit_flag)
+{
+    // TODO
+}
+
 FORT_API void fort_shaper_conf_update(PFORT_SHAPER shaper, PCFORT_CONF_IO conf_io)
 {
     PCFORT_CONF_GROUP conf_group = &conf_io->conf_group;
