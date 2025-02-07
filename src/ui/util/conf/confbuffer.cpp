@@ -433,8 +433,10 @@ bool ConfBuffer::addApp(const App &app, bool isNew, appdata_map_t &appsMap, quin
         .speed_limit_in_id = app.speedLimitInId,
         .speed_limit_out_id = app.speedLimitOutId,
         .rule_id = app.ruleId,
-        .accept_zones = app.acceptZones,
-        .reject_zones = app.rejectZones,
+        .zones = {
+            .accept_mask = app.acceptZones,
+            .reject_mask = app.rejectZones,
+        },
     };
 
     appsMap.insert(kernelPath, appData);

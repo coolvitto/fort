@@ -152,7 +152,7 @@ inline static BOOL fort_callout_ale_associate_flow(
 inline static BOOL fort_callout_ale_log_app_path_check(
         FORT_CONF_FLAGS conf_flags, const FORT_APP_DATA app_data)
 {
-    return app_data.found == 0 && conf_flags.filter_enabled
+    return app_data.flags.found == 0 && conf_flags.filter_enabled
             && (conf_flags.allow_all_new || conf_flags.log_app);
 }
 
@@ -188,10 +188,10 @@ inline static void fort_callout_ale_log_app_path(PFORT_CALLOUT_ALE_EXTRA cx,
 inline static BOOL fort_callout_ale_log_conn_check_app(
         FORT_CONF_FLAGS conf_flags, FORT_APP_DATA app_data, BOOL blocked)
 {
-    const BOOL log_conn = app_data.found == 0
+    const BOOL log_conn = app_data.flags.found == 0
             || (blocked ? app_data.flags.log_blocked_conn : app_data.flags.log_allowed_conn);
 
-    return log_conn && (app_data.alerted || !conf_flags.log_alerted_conn);
+    return log_conn && (app_data.flags.alerted || !conf_flags.log_alerted_conn);
 }
 
 inline static BOOL fort_callout_ale_log_conn_check(PCFORT_CALLOUT_ARG ca,
@@ -244,14 +244,11 @@ inline static BOOL fort_callout_ale_process_flow(PCFORT_CALLOUT_ARG ca, PFORT_CA
 inline static BOOL fort_callout_ale_conn_zone_filtered(
         PFORT_CONF_META_CONN conn, const FORT_APP_DATA app_data)
 {
-    if (app_data.reject_zones == 0 && app_data.accept_zones == 0)
+    if (app_data.zones.accept_mask == 0 && app_data.zones.reject_mask == 0)
         return FALSE;
 
     FORT_CONF_ZONES_CONN_FILTERED_OPT opt = {
-        .rule_zones = {
-                .accept_mask = app_data.accept_zones,
-                .reject_mask = app_data.reject_zones,
-        },
+        .rule_zones = app_data.zones,
     };
 
     if (fort_devconf_zones_conn_filtered(&fort_device()->conf, conn, &opt)) {
@@ -343,7 +340,7 @@ inline static BOOL fort_callout_ale_filtered(
         return TRUE; /* filtered by Global Rule Pre Apps */
     }
 
-    const BOOL isAppFound = (app_data.found != 0);
+    const BOOL isAppFound = (app_data.flags.found != 0);
     if (isAppFound) {
         if (fort_callout_ale_app_filtered(conn, conf_flags, app_data)) {
             return TRUE; /* filtered by App */
