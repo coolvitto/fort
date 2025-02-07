@@ -110,6 +110,7 @@ SOURCES += \
     form/rule/ruleeditdialog.cpp \
     form/rule/rulescontroller.cpp \
     form/rule/ruleswindow.cpp \
+    form/speed/speedlimitswindow.cpp \
     form/stat/pages/connectionspage.cpp \
     form/stat/pages/statbasepage.cpp \
     form/stat/pages/statmainpage.cpp \
@@ -365,6 +366,7 @@ HEADERS += \
     form/rule/ruleeditdialog.h \
     form/rule/rulescontroller.h \
     form/rule/ruleswindow.h \
+    form/speed/speedlimitswindow.h \
     form/stat/pages/connectionspage.h \
     form/stat/pages/statbasepage.h \
     form/stat/pages/statmainpage.h \
