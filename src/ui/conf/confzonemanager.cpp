@@ -85,17 +85,12 @@ ConfZoneManager::ConfZoneManager(QObject *parent) : QObject(parent) { }
 
 ConfManager *ConfZoneManager::confManager() const
 {
-    return m_confManager;
+    return IoC<ConfManager>();
 }
 
 SqliteDb *ConfZoneManager::sqliteDb() const
 {
     return confManager()->sqliteDb();
-}
-
-void ConfZoneManager::setUp()
-{
-    m_confManager = IoCDependency<ConfManager>();
 }
 
 QString ConfZoneManager::zoneNameById(int zoneId)

@@ -22,8 +22,6 @@ public:
     ConfManager *confManager() const;
     SqliteDb *sqliteDb() const;
 
-    void setUp() override;
-
     QString zoneNameById(int zoneId);
 
     virtual bool addOrUpdateZone(Zone &zone);
@@ -45,9 +43,6 @@ private:
 
     bool beginTransaction();
     void commitTransaction(bool &ok);
-
-private:
-    ConfManager *m_confManager = nullptr;
 };
 
 #endif // CONFZONEMANAGER_H

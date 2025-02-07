@@ -142,17 +142,12 @@ ConfRuleManager::ConfRuleManager(QObject *parent) : QObject(parent) { }
 
 ConfManager *ConfRuleManager::confManager() const
 {
-    return m_confManager;
+    return IoC<ConfManager>();
 }
 
 SqliteDb *ConfRuleManager::sqliteDb() const
 {
     return confManager()->sqliteDb();
-}
-
-void ConfRuleManager::setUp()
-{
-    m_confManager = IoCDependency<ConfManager>();
 }
 
 QString ConfRuleManager::ruleNameById(int ruleId)

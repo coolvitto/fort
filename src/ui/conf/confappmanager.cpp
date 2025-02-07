@@ -142,7 +142,7 @@ ConfAppManager::ConfAppManager(QObject *parent) : QObject(parent)
 
 ConfManager *ConfAppManager::confManager() const
 {
-    return m_confManager;
+    return IoC<ConfManager>();
 }
 
 SqliteDb *ConfAppManager::sqliteDb() const
@@ -157,7 +157,7 @@ FirewallConf *ConfAppManager::conf() const
 
 void ConfAppManager::setUp()
 {
-    m_confManager = IoCDependency<ConfManager>();
+    IoCDependency<ConfManager>();
 
     setupDriveListManager();
 

@@ -23,8 +23,6 @@ public:
     ConfManager *confManager() const;
     SqliteDb *sqliteDb() const;
 
-    void setUp() override;
-
     QString ruleNameById(int ruleId);
 
     void loadRuleSet(Rule &rule, QStringList &ruleSetNames);
@@ -60,9 +58,6 @@ private:
 
     bool beginTransaction();
     void commitTransaction(bool &ok);
-
-private:
-    ConfManager *m_confManager = nullptr;
 };
 
 #endif // CONFRULEMANAGER_H

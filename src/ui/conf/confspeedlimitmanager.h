@@ -11,12 +11,16 @@
 class ConfManager;
 class SpeedLimit;
 
-class ConfSpeedLimitManager : public QObject
+class ConfSpeedLimitManager : public QObject, public IocService
 {
     Q_OBJECT
 
 public:
     explicit ConfSpeedLimitManager(QObject *parent = nullptr);
+    CLASS_DELETE_COPY_MOVE(ConfSpeedLimitManager)
+
+    ConfManager *confManager() const;
+    SqliteDb *sqliteDb() const;
 
 signals:
 };

@@ -100,8 +100,6 @@ private:
 private:
     quint32 m_driveMask = 0;
 
-    ConfManager *m_confManager = nullptr;
-
     TriggerTimer m_appAlertedTimer;
     TriggerTimer m_appsChangedTimer;
     TriggerTimer m_appUpdatedTimer;
