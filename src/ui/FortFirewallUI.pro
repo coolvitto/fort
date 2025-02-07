@@ -22,6 +22,7 @@ SOURCES += \
     conf/appgroup.cpp \
     conf/confappmanager.cpp \
     conf/confmanager.cpp \
+    conf/confmanagerbase.cpp \
     conf/confrulemanager.cpp \
     conf/confspeedlimitmanager.cpp \
     conf/confzonemanager.cpp \
@@ -274,6 +275,7 @@ HEADERS += \
     conf/appgroup.h \
     conf/confappmanager.h \
     conf/confmanager.h \
+    conf/confmanagerbase.h \
     conf/confrulemanager.h \
     conf/confspeedlimitmanager.h \
     conf/confzonemanager.h \

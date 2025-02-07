@@ -81,17 +81,7 @@ bool driverWriteZones(ConfBuffer &confBuf, bool onlyFlags = false)
 
 }
 
-ConfZoneManager::ConfZoneManager(QObject *parent) : QObject(parent) { }
-
-ConfManager *ConfZoneManager::confManager() const
-{
-    return IoC<ConfManager>();
-}
-
-SqliteDb *ConfZoneManager::sqliteDb() const
-{
-    return confManager()->sqliteDb();
-}
+ConfZoneManager::ConfZoneManager(QObject *parent) : ConfManagerBase(parent) { }
 
 QString ConfZoneManager::zoneNameById(int zoneId)
 {
@@ -256,14 +246,4 @@ bool ConfZoneManager::updateDriverZoneFlag(int zoneId, bool enabled)
     confBuf.writeZoneFlag(zoneId, enabled);
 
     return driverWriteZones(confBuf, /*onlyFlags=*/true);
-}
-
-bool ConfZoneManager::beginTransaction()
-{
-    return sqliteDb()->beginWriteTransaction();
-}
-
-void ConfZoneManager::commitTransaction(bool &ok)
-{
-    ok = sqliteDb()->endTransaction(ok);
 }

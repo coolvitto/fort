@@ -130,7 +130,7 @@ using AppIdsArray = QVector<qint64>;
 
 }
 
-ConfAppManager::ConfAppManager(QObject *parent) : QObject(parent)
+ConfAppManager::ConfAppManager(QObject *parent) : ConfManagerBase(parent)
 {
     connect(&m_appAlertedTimer, &QTimer::timeout, this, &ConfAppManager::appAlerted);
     connect(&m_appsChangedTimer, &QTimer::timeout, this, &ConfAppManager::appsChanged);
@@ -138,21 +138,6 @@ ConfAppManager::ConfAppManager(QObject *parent) : QObject(parent)
 
     m_appEndTimer.setSingleShot(true);
     connect(&m_appEndTimer, &QTimer::timeout, this, &ConfAppManager::updateAppEndTimes);
-}
-
-ConfManager *ConfAppManager::confManager() const
-{
-    return IoC<ConfManager>();
-}
-
-SqliteDb *ConfAppManager::sqliteDb() const
-{
-    return confManager()->sqliteDb();
-}
-
-FirewallConf *ConfAppManager::conf() const
-{
-    return confManager()->conf();
 }
 
 void ConfAppManager::setUp()
@@ -769,14 +754,4 @@ bool ConfAppManager::updateDriverUpdateApp(const App &app, bool remove)
 bool ConfAppManager::updateDriverUpdateAppConf(const App &app)
 {
     return app.isWildcard ? updateDriverConf() : updateDriverUpdateApp(app);
-}
-
-bool ConfAppManager::beginTransaction()
-{
-    return sqliteDb()->beginWriteTransaction();
-}
-
-void ConfAppManager::commitTransaction(bool &ok)
-{
-    ok = sqliteDb()->endTransaction(ok);
 }

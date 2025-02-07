@@ -138,17 +138,7 @@ bool driverWriteRules(ConfBuffer &confBuf, bool onlyFlags = false)
 
 }
 
-ConfRuleManager::ConfRuleManager(QObject *parent) : QObject(parent) { }
-
-ConfManager *ConfRuleManager::confManager() const
-{
-    return IoC<ConfManager>();
-}
-
-SqliteDb *ConfRuleManager::sqliteDb() const
-{
-    return confManager()->sqliteDb();
-}
+ConfRuleManager::ConfRuleManager(QObject *parent) : ConfManagerBase(parent) { }
 
 QString ConfRuleManager::ruleNameById(int ruleId)
 {
@@ -492,14 +482,4 @@ bool ConfRuleManager::updateDriverRuleFlag(int ruleId, bool enabled)
     confBuf.writeRuleFlag(ruleId, enabled);
 
     return driverWriteRules(confBuf, /*onlyFlags=*/true);
-}
-
-bool ConfRuleManager::beginTransaction()
-{
-    return sqliteDb()->beginWriteTransaction();
-}
-
-void ConfRuleManager::commitTransaction(bool &ok)
-{
-    ok = sqliteDb()->endTransaction(ok);
 }
