@@ -5,7 +5,6 @@
 #include <QTime>
 #include <QVariant>
 
-#define MAX_APP_GROUP_COUNT       16
 #define DEFAULT_LIMIT_BUFFER_SIZE 150000
 
 class AppGroup : public QObject

@@ -27,6 +27,7 @@
 #include <form/opt/optionscontroller.h>
 #include <fortsettings.h>
 #include <user/iniuser.h>
+#include <util/conf/confutil.h>
 #include <util/formatutil.h>
 #include <util/guiutil.h>
 #include <util/textareautil.h>
@@ -278,7 +279,7 @@ void ApplicationsPage::setupAddGroup()
     });
 
     const auto refreshAddGroup = [&] {
-        m_btAddGroup->setEnabled(appGroupsCount() < MAX_APP_GROUP_COUNT);
+        m_btAddGroup->setEnabled(appGroupsCount() < ConfUtil::groupMaxCount());
     };
 
     refreshAddGroup();
