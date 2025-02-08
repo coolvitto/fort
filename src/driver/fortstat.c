@@ -454,7 +454,8 @@ static NTSTATUS fort_flow_associate_proc(
     return STATUS_SUCCESS;
 }
 
-FORT_API NTSTATUS fort_flow_associate(PFORT_STAT stat, PCFORT_CONF_META_CONN conn, BOOL *log_stat)
+FORT_API NTSTATUS fort_flow_associate(
+        PFORT_STAT stat, PCFORT_CONF_META_CONN conn, BOOL *proc_log_stat)
 {
     NTSTATUS status;
 
@@ -470,7 +471,7 @@ FORT_API NTSTATUS fort_flow_associate(PFORT_STAT stat, PCFORT_CONF_META_CONN con
         status = fort_flow_add(stat, conn, proc);
 
         if (NT_SUCCESS(status)) {
-            *log_stat = proc->log_stat;
+            *proc_log_stat = proc->log_stat;
             proc->log_stat = TRUE;
         } else if (is_new_proc) {
             fort_stat_proc_free(stat, proc);

@@ -127,9 +127,9 @@ static FORT_APP_DATA fort_callout_ale_conf_app_data(
 inline static BOOL fort_callout_ale_associate_flow(
         PFORT_CALLOUT_ALE_EXTRA cx, PFORT_CONF_META_CONN conn)
 {
-    BOOL log_stat = FALSE;
+    BOOL proc_log_stat = FALSE;
 
-    const NTSTATUS status = fort_flow_associate(&fort_device()->stat, conn, &log_stat);
+    const NTSTATUS status = fort_flow_associate(&fort_device()->stat, conn, &proc_log_stat);
 
     if (!NT_SUCCESS(status)) {
         if (status != FORT_STATUS_FLOW_BLOCK) {
@@ -141,7 +141,7 @@ inline static BOOL fort_callout_ale_associate_flow(
         return TRUE; /* block (Error) */
     }
 
-    if (!log_stat) {
+    if (!proc_log_stat) {
         fort_buffer_conn_write(
                 &fort_device()->buffer, conn, &cx->irp_info, FORT_BUFFER_CONN_WRITE_PROC_NEW);
     }
