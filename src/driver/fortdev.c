@@ -222,6 +222,22 @@ static NTSTATUS fort_device_control_setflags(PFORT_DEVICE_CONTROL_ARG dca)
     return STATUS_UNSUCCESSFUL;
 }
 
+static NTSTATUS fort_device_control_setgroupsmask(PFORT_DEVICE_CONTROL_ARG dca)
+{
+    PUINT64 groups_mask = dca->buffer;
+    const ULONG len = dca->in_len;
+
+    if (len == sizeof(UINT64)) {
+        fort_conf_ref_groups_mask_set(&fort_device()->conf, *groups_mask);
+
+        fort_device_reauth();
+
+        return STATUS_SUCCESS;
+    }
+
+    return STATUS_UNSUCCESSFUL;
+}
+
 static NTSTATUS fort_device_control_getlog(PFORT_DEVICE_CONTROL_ARG dca)
 {
     PVOID out = dca->buffer;
@@ -419,6 +435,7 @@ static PFORT_DEVICE_CONTROL_PROCESS_FUNC fortDeviceControlProcess_funcList[] = {
     &fort_device_control_setservices, // FORT_IOCTL_SETSERVICES
     &fort_device_control_setconf, // FORT_IOCTL_SETCONF
     &fort_device_control_setflags, // FORT_IOCTL_SETFLAGS
+    &fort_device_control_setgroupsmask, // FORT_IOCTL_SETGROUPSMASK
     &fort_device_control_getlog, // FORT_IOCTL_GETLOG
     &fort_device_control_addapp, // FORT_IOCTL_ADDAPP
     &fort_device_control_delapp, // FORT_IOCTL_DELAPP

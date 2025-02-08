@@ -84,6 +84,8 @@ FORT_API FORT_CONF_FLAGS fort_conf_ref_set(PFORT_DEVICE_CONF device_conf, PFORT_
 FORT_API FORT_CONF_FLAGS fort_conf_ref_flags_set(
         PFORT_DEVICE_CONF device_conf, const FORT_CONF_FLAGS conf_flags);
 
+FORT_API void fort_conf_ref_groups_mask_set(PFORT_DEVICE_CONF device_conf, UINT64 groups_mask);
+
 FORT_API PFORT_CONF_ZONES fort_conf_zones_new(PCFORT_CONF_ZONES zones, ULONG len);
 
 FORT_API void fort_conf_zones_set(PFORT_DEVICE_CONF device_conf, PFORT_CONF_ZONES zones);

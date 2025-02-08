@@ -13,6 +13,7 @@ quint32 ioctlValidate();
 quint32 ioctlSetServices();
 quint32 ioctlSetConf();
 quint32 ioctlSetFlags();
+quint32 ioctlSetGroupsMask();
 quint32 ioctlGetLog();
 quint32 ioctlAddApp();
 quint32 ioctlDelApp();

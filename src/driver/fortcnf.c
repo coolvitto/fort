@@ -421,6 +421,22 @@ FORT_API FORT_CONF_FLAGS fort_conf_ref_flags_set(
     return old_conf_flags;
 }
 
+FORT_API void fort_conf_ref_groups_mask_set(PFORT_DEVICE_CONF device_conf, UINT64 groups_mask)
+{
+    KLOCK_QUEUE_HANDLE lock_queue;
+    KeAcquireInStackQueuedSpinLock(&device_conf->ref_lock, &lock_queue);
+    {
+        PFORT_CONF_REF conf_ref = device_conf->ref;
+
+        if (conf_ref != NULL) {
+            PFORT_CONF conf = &conf_ref->conf;
+
+            conf->groups_mask = groups_mask;
+        }
+    }
+    KeReleaseInStackQueuedSpinLock(&lock_queue);
+}
+
 FORT_API PFORT_CONF_ZONES fort_conf_zones_new(PCFORT_CONF_ZONES zones, ULONG len)
 {
     return fort_conf_mem_alloc(zones, len);
