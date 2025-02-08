@@ -384,14 +384,16 @@ inline static BOOL fort_callout_ale_allowed(
 inline static void fort_callout_ale_check_app(PCFORT_CALLOUT_ARG ca, PFORT_CALLOUT_ALE_EXTRA cx,
         PFORT_CONF_REF conf_ref, const FORT_CONF_FLAGS conf_flags)
 {
-    const FORT_APP_DATA app_data = fort_callout_ale_conf_app_data(ca, cx, conf_ref);
+    PFORT_CONF_META_CONN conn = &cx->conn;
+
+    const FORT_APP_DATA app_data = fort_callout_ale_conf_app_data(ca, conn, conf_ref);
 
     if (fort_callout_ale_allowed(cx, conf_flags, app_data)) {
 
         if (fort_callout_ale_process_flow(ca, cx, conf_flags, app_data))
             return;
 
-        cx->conn.blocked = FALSE; /* allow */
+        conn->blocked = FALSE; /* allow */
     }
 
     fort_callout_ale_log_app_path(cx, conf_ref, conf_flags, app_data);
@@ -493,12 +495,27 @@ inline static void fort_callout_ale_classify_action(
     }
 }
 
+inline static void fort_callout_ale_classify_boot_action(
+        PCFORT_CALLOUT_ARG ca, PFORT_DEVICE_CONF device_conf)
+{
+    FWPS_CLASSIFY_OUT0 *classifyOut = ca->classifyOut;
+
+    const BOOL isBootFilter = fort_device_flag(device_conf, FORT_DEVICE_BOOT_FILTER) != 0;
+    if (isBootFilter) {
+        /* Block the connection */
+        fort_callout_classify_block(classifyOut);
+    } else {
+        /* Continue the search */
+        fort_callout_classify_continue(classifyOut);
+    }
+}
+
 inline static void fort_callout_ale_check_conf(PCFORT_CALLOUT_ARG ca, PFORT_CALLOUT_ALE_EXTRA cx,
         PFORT_CONF_REF conf_ref, const FORT_CONF_FLAGS conf_flags)
 {
     PFORT_CONF_META_CONN conn = &cx->conn;
 
-    fort_callout_ale_fill_meta_conn(ca, cx);
+    fort_callout_ale_fill_meta_conn(ca, conn);
 
     conn->blocked = TRUE;
     conn->reason = FORT_CONN_REASON_UNKNOWN;
@@ -524,11 +541,7 @@ inline static void fort_callout_ale_by_conf(PCFORT_CALLOUT_ARG ca, PFORT_CALLOUT
     PFORT_CONF_REF conf_ref = fort_conf_ref_take(device_conf);
 
     if (conf_ref == NULL) {
-        if (fort_device_flag(device_conf, FORT_DEVICE_BOOT_FILTER) != 0) {
-            fort_callout_classify_block(ca->classifyOut);
-        } else {
-            fort_callout_classify_continue(ca->classifyOut);
-        }
+        fort_callout_ale_classify_boot_action(ca, device_conf);
         return;
     }
 
