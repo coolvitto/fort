@@ -424,7 +424,7 @@ void FortSettings::readConfIni(FirewallConf &conf) const
     conf.setLogAlertedConn(iniBool("logAlertedConn"));
     conf.setAppBlockAll(iniBool("appBlockAll", true));
     conf.setAppAllowAll(iniBool("appAllowAll"));
-    conf.setupAppGroupBits(iniUInt("appGroupBits", DEFAULT_APP_GROUP_BITS));
+    conf.setupAppGroupsMask(iniUInt64("appGroupsMask", DEFAULT_APP_GROUPS_MASK));
     ini()->endGroup();
 
     ini()->beginGroup("stat");
@@ -470,7 +470,7 @@ void FortSettings::writeConfIni(const FirewallConf &conf)
         setIniValue("logAlertedConn", conf.logAlertedConn());
         setIniValue("appBlockAll", conf.appBlockAll());
         setIniValue("appAllowAll", conf.appAllowAll());
-        setIniValue("appGroupBits", conf.appGroupBits(), DEFAULT_APP_GROUP_BITS);
+        setIniValue("appGroupsMask", conf.appGroupsMask(), DEFAULT_APP_GROUPS_MASK);
         ini()->endGroup();
 
         ini()->beginGroup("stat");
@@ -557,6 +557,11 @@ void FortSettings::migrateIniOnLoad()
         setCacheValue("confFlags/logBlockedConn", ini()->value("confFlags/logBlockedIp"));
         setCacheValue("confFlags/logAlertedConn", ini()->value("confFlags/logAlertedBlockedIp"));
     }
+
+    // COMPAT: v3.16.1
+    if (version < 0x031601) {
+        setCacheValue("confFlags/appGroupsMask", ini()->value("confFlags/appGroupBits"));
+    }
 }
 
 void FortSettings::migrateIniOnWrite()
@@ -611,6 +616,12 @@ void FortSettings::migrateIniOnWrite()
         ini()->setValue("confFlags/logApp", cacheValue("confFlags/logApp"));
         ini()->setValue("confFlags/logBlockedConn", cacheValue("confFlags/logBlockedConn"));
         ini()->setValue("confFlags/logAlertedConn", cacheValue("confFlags/logAlertedConn"));
+    }
+
+    // COMPAT: v3.16.1
+    if (version < 0x031601) {
+        removeIniKey("confFlags/appGroupBits");
+        ini()->setValue("confFlags/appGroupsMask", cacheValue("confFlags/appGroupsMask"));
     }
 }
 

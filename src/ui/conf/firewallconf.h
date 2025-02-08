@@ -142,14 +142,14 @@ public:
     QString activePeriodTo() const { return m_activePeriodTo; }
     void setActivePeriodTo(const QString &v) { m_activePeriodTo = v; }
 
-    quint32 appGroupBits() const { return m_appGroupBits; }
-    void setAppGroupBits(quint32 v) { m_appGroupBits = v; }
+    quint64 appGroupsMask() const { return m_appGroupsMask; }
+    void setAppGroupsMask(quint64 v) { m_appGroupsMask = v; }
 
-    quint32 activeGroupBits() const { return m_appGroupBits & m_groupActivePeriodBits; }
+    quint64 activeGroupsMask() const { return m_appGroupsMask & m_groupActivePeriodsMask; }
 
-    void setupAppGroupBits(quint32 v);
+    void setupAppGroupsMask(quint64 v);
 
-    bool appGroupEnabled(int groupIndex) const;
+    bool appGroupEnabled(int groupId) const;
 
     AddressGroup *inetAddressGroup() const { return m_addressGroups.first(); }
 
@@ -201,10 +201,10 @@ private:
 
     void setAppGroupsEdited(int from, int to);
 
-    void loadGroupPeriodBits();
+    void loadGroupPeriodsMask();
 
-    void loadAppGroupBits();
-    void applyAppGroupBits();
+    void loadAppGroupsMask();
+    void applyAppGroupsMask();
 
     QVariant flagsToVariant() const;
     void flagsFromVariant(const QVariant &v);
@@ -247,8 +247,8 @@ private:
     uint m_activePeriodEnabled : 1 = false;
     uint m_anyGroupPeriodEnabled : 1 = false;
 
-    quint32 m_appGroupBits = 0;
-    quint32 m_groupActivePeriodBits = quint32(-1); // transient
+    quint64 m_appGroupsMask = 0;
+    quint64 m_groupActivePeriodsMask = quint64(-1LL); // transient
 
     QString m_activePeriodFrom;
     QString m_activePeriodTo;

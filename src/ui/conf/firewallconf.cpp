@@ -116,15 +116,15 @@ QStringList FirewallConf::filterModeIconPaths()
         ":/icons/road_sign.png" };
 }
 
-void FirewallConf::setupAppGroupBits(quint32 v)
+void FirewallConf::setupAppGroupsMask(quint64 v)
 {
-    setAppGroupBits(v);
-    applyAppGroupBits();
+    setAppGroupsMask(v);
+    applyAppGroupsMask();
 }
 
-bool FirewallConf::appGroupEnabled(int groupIndex) const
+bool FirewallConf::appGroupEnabled(int groupId) const
 {
-    return (appGroupBits() & (1 << groupIndex)) != 0;
+    return (appGroupsMask() & (1ULL << groupId)) != 0;
 }
 
 const AppGroup *FirewallConf::appGroupAt(int index) const
@@ -220,38 +220,38 @@ void FirewallConf::clearRemovedAppGroupIdList() const
     m_removedAppGroupIdList.clear();
 }
 
-void FirewallConf::loadGroupPeriodBits()
+void FirewallConf::loadGroupPeriodsMask()
 {
     const QTime now = DateUtil::currentTime();
 
     m_anyGroupPeriodEnabled = false;
-    m_groupActivePeriodBits = quint32(-1);
-    int groupIndex = 0;
+    m_groupActivePeriodsMask = quint32(-1);
+    int groupId = 0;
     for (AppGroup *appGroup : appGroups()) {
         if (appGroup->enabled() && appGroup->periodEnabled()) {
             m_anyGroupPeriodEnabled = true;
 
             if (!appGroup->isTimeInPeriod(now)) {
-                m_groupActivePeriodBits ^= (1 << groupIndex);
+                m_groupActivePeriodsMask ^= (1ULL << groupId);
             }
         }
-        ++groupIndex;
+        ++groupId;
     }
 }
 
-void FirewallConf::loadAppGroupBits()
+void FirewallConf::loadAppGroupsMask()
 {
-    m_appGroupBits = 0;
-    int groupIndex = 0;
+    m_appGroupsMask = 1; // + default group
+    int groupId = 1;
     for (const AppGroup *appGroup : appGroups()) {
         if (appGroup->enabled()) {
-            m_appGroupBits |= (1 << groupIndex);
+            m_appGroupsMask |= (1ULL << groupId);
         }
-        ++groupIndex;
+        ++groupId;
     }
 }
 
-void FirewallConf::applyAppGroupBits()
+void FirewallConf::applyAppGroupsMask()
 {
     int groupIndex = 0;
     for (AppGroup *appGroup : appGroups()) {
@@ -268,8 +268,6 @@ void FirewallConf::setupDefaultAddressGroups()
 void FirewallConf::setupAddressGroups()
 {
     m_addressGroups.append(new AddressGroup(this));
-
-    // COMPAT: Remove after v4.1.0
     m_addressGroups.append(new AddressGroup(this));
 }
 
@@ -289,7 +287,7 @@ void FirewallConf::setAppGroupsEdited(int from, int to)
 void FirewallConf::prepareToSave()
 {
     if (flagsEdited()) {
-        loadAppGroupBits();
+        loadAppGroupsMask();
     }
 }
 
@@ -300,7 +298,7 @@ void FirewallConf::afterSaved()
 
 bool FirewallConf::updateGroupPeriods(bool /*onlyFlags*/)
 {
-    loadGroupPeriodBits();
+    loadGroupPeriodsMask();
 
     return m_anyGroupPeriodEnabled;
 }
@@ -336,7 +334,7 @@ void FirewallConf::copyFlags(const FirewallConf &o)
     m_activePeriodFrom = o.activePeriodFrom();
     m_activePeriodTo = o.activePeriodTo();
 
-    setupAppGroupBits(o.appGroupBits());
+    setupAppGroupsMask(o.appGroupsMask());
 }
 
 void FirewallConf::copy(const FirewallConf &o)
@@ -387,7 +385,7 @@ QVariant FirewallConf::flagsToVariant() const
     map["activePeriodFrom"] = activePeriodFrom();
     map["activePeriodTo"] = activePeriodTo();
 
-    map["appGroupBits"] = appGroupBits();
+    map["appGroupsMask"] = appGroupsMask();
 
     return map;
 }
@@ -423,7 +421,7 @@ void FirewallConf::flagsFromVariant(const QVariant &v)
     m_activePeriodFrom = map["activePeriodFrom"].toString();
     m_activePeriodTo = map["activePeriodTo"].toString();
 
-    setupAppGroupBits(map["appGroupBits"].toUInt());
+    setupAppGroupsMask(map["appGroupsMask"].toULongLong());
 }
 
 QVariant FirewallConf::addressesToVariant() const

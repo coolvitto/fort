@@ -585,12 +585,12 @@ void ConfManager::setupTimers()
 
 void ConfManager::updateConfPeriods()
 {
-    const auto activeGroupBits = conf() ? conf()->activeGroupBits() : 0;
+    const auto activeGroupsMask = conf() ? conf()->activeGroupsMask() : 0;
 
     if (!applyConfPeriods(/*onlyFlags=*/false))
         return;
 
-    if (conf() && activeGroupBits != conf()->activeGroupBits()) {
+    if (conf() && activeGroupsMask != conf()->activeGroupsMask()) {
         emit confPeriodsChanged();
     }
 }

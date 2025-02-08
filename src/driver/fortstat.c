@@ -427,7 +427,7 @@ FORT_API void fort_stat_conf_flags_update(PFORT_STAT stat, const FORT_CONF_FLAGS
     KLOCK_QUEUE_HANDLE lock_queue;
     KeAcquireInStackQueuedSpinLock(&stat->lock, &lock_queue);
     {
-        stat->conf_group.group_bits = (UINT16) conf_flags.group_bits;
+        stat->conf_group.group_bits = 0; // (UINT16) conf_flags.group_bits;
     }
     KeReleaseInStackQueuedSpinLock(&lock_queue);
 }

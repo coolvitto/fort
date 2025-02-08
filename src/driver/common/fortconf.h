@@ -57,8 +57,6 @@ typedef struct fort_conf_flags
     UINT32 log_alerted_conn : 1;
 
     UINT32 reserved_flags : 13; /* not used */
-
-    UINT32 group_bits;
 } FORT_CONF_FLAGS, *PFORT_CONF_FLAGS;
 
 typedef const FORT_CONF_FLAGS *PCFORT_CONF_FLAGS;
@@ -444,6 +442,8 @@ typedef struct fort_conf
     UINT32 prefix_apps_off;
     UINT32 exe_apps_off;
 
+    UINT64 groups_mask;
+
     char data[4];
 } FORT_CONF, *PFORT_CONF;
 
@@ -552,9 +552,6 @@ FORT_API FORT_APP_DATA fort_conf_app_exe_find(
 
 FORT_API FORT_APP_DATA fort_conf_app_find(PCFORT_CONF conf, PCFORT_APP_PATH path,
         fort_conf_app_exe_find_func *exe_find_func, PVOID exe_context);
-
-FORT_API BOOL fort_conf_app_group_blocked(
-        const FORT_CONF_FLAGS conf_flags, const FORT_APP_DATA app_data);
 
 FORT_API BOOL fort_conf_rules_rt_conn_filtered(
         PCFORT_CONF_RULES_RT rules_rt, PFORT_CONF_META_CONN conn, UINT16 rule_id);

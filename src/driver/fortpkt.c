@@ -906,8 +906,8 @@ FORT_API void fort_shaper_conf_update(PFORT_SHAPER shaper, PCFORT_CONF_IO conf_i
 
 void fort_shaper_conf_flags_update(PFORT_SHAPER shaper, const FORT_CONF_FLAGS conf_flags)
 {
-    const UINT32 group_io_bits =
-            conf_flags.filter_enabled ? fort_bits_duplicate16((UINT16) conf_flags.group_bits) : 0;
+    const UINT32 group_io_bits = 0;
+    // conf_flags.filter_enabled ? fort_bits_duplicate16((UINT16) conf_flags.group_bits) : 0;
     UINT32 flush_io_bits;
 
     KLOCK_QUEUE_HANDLE lock_queue;
